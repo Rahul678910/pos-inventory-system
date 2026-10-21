@@ -1,148 +1,221 @@
-<div align="center">
+::: {align="center"}
+# 🛒 Apna Market
 
-# 🛒 Apna Market - POS & Inventory Management System
+### POS & Inventory Management System
 
-**A lightweight, production-grade Point of Sale (POS) and Inventory Manager desktop application built with Python, Tkinter, and SQLite.**
+**A desktop toolkit for smarter billing, stock control, and retail
+reporting.**
 
-[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![GUI](https://img.shields.io/badge/GUI-Tkinter%20%2F%20ttk-blue)](https://docs.python.org/3/library/tkinter.html)
-[![Database](https://img.shields.io/badge/Database-SQLite3-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](#)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+Built with **Python · Tkinter · SQLite**
 
-[Features](#-key-features) • [Quickstart](#-quickstart) • [Jupyter Notebook](#-running-in-jupyter-notebook) • [Database Schema](#-database-schema) • [Screens](#-screens--walkthrough) • [Contributing](#-contributing)
-
-</div>
-
----
-
-## 📖 Overview
-
-Designed specifically for **market businessmen, retail shopkeepers, and local grocery store owners**, this system provides a full-featured desktop workflow that requires zero complicated database servers or heavy web frameworks. It runs locally using Python's built-in **Tkinter** and **SQLite3**, with optional support for **Matplotlib** (interactive revenue charts) and **ReportLab** (printable PDF invoices).
-
-Available both as an interactive **Jupyter Notebook (`market_pos_inventory.ipynb`)** and a modular standalone **desktop application (`market_app.py`)**.
-
----
-
-## ✨ Key Features
-
-- **📊 Smart Dashboard**:
-  - Live KPI cards: Today's Revenue (₹), Units Sold Today, Low-Stock Count, and Active Catalog Count.
-  - Automatic low-stock warnings with a 1-click **Quick Restock** modal.
-  - Recent sales feed with timestamp and customer details.
-
-- **🏷️ Product Catalog (CRUD)**:
-  - Add, edit, update, and delete inventory items.
-  - Fields for SKU / Barcode, Item Name, Category, Cost Price, Selling Price, Current Stock, and Min-Stock Alert Level.
-  - Real-time search filter and visual color highlighting for low-stock products.
-
-- **🛒 Fast POS & Checkout**:
-  - **Barcode Scanner Compatible**: Instant lookup via USB/Bluetooth barcode scanner or manual SKU entry with Enter-to-Add.
-  - Dynamic cart management with quantity increment/decrement (`+1` / `-1`) and real-time subtotal calculation.
-  - Customer assignment (select existing customer or walk-in).
-  - Configurable **Discount %** and **GST / Tax %** with automatic line-item and grand total calculations.
-  - Payment modes: Cash, UPI / QR Code, and Debit/Credit Card.
-  - Real-time stock verification to prevent overselling.
-
-- **📦 Inventory Management & Audit Logs**:
-  - Manual Stock In (Purchases/Restocks), Stock Out (Damages/Expired), and Audit Adjustments.
-  - Complete, immutable audit log recording every inventory change, previous vs new stock, timestamps, and reasons.
-  - Automatic stock deduction upon completed sales.
-
-- **👥 Customer Management & Purchase History**:
-  - Customer directory with phone number and email records.
-  - Click any customer to view their complete historical transactions and previous orders.
-
-- **📈 Analytics & Business Reports**:
-  - Timeframe filtering: *All Time*, *Today*, *Last 7 Days*, *Last 30 Days*.
-  - Financial insights: Total Revenue, Cost of Goods Sold (COGS), Gross Profit, and Profit Margin %.
-  - Top 10 Best-Selling Products table.
-  - Embedded daily revenue trend chart (powered by `matplotlib` with a neat tabular fallback).
-
-- **🔐 Dual Role-Based Access Control**:
-  - **Admin / Owner Mode**: Full access to financial metrics, cost prices, profit margins, and deletion privileges.
-  - **Cashier Mode**: Restricts confidential profit figures and cost prices while keeping billing and search fast and accessible.
-
-- **🧾 Automated Invoicing Engine**:
-  - Generates professional PDF invoices (via `reportlab`) saved in `invoices/`.
-  - Clean formatted receipt fallback (`.txt`) for standard thermal or text receipt printing.
-
----
-
-## 🖥️ Screens & Walkthrough
-
+```{=html}
+<p>
 ```
-+-----------------------------------------------------------------------------------+
-| 🛒 APNA MARKET | POS & Inventory Management System            [Role: Admin] [Switch] |
-+-----------------------------------------------------------------------------------+
-| [ 📊 Dashboard ] [ 🏷️ Products ] [ 🛒 Billing / POS ] [ 📦 Inventory ] [ 📈 Reports ] |
-+-----------------------------------------------------------------------------------+
-|  Today's Revenue       Units Sold Today       Low-Stock Alerts       Total Products |
-|     ₹ 12,450.00               84                      3                    45     |
-+-----------------------------------------------------------------------------------+
-| [ ⚠️ Low-Stock Warnings ]                 | [ 🕒 Recent Sales Activity ]            |
-| - Assam Gold Tea 250g (Stock: 4 / Min: 6) | - INV-261021-01  Priya Sharma  ₹ 403.99 |
-| - Herbal Bath Soap    (Stock: 3 / Min: 8) | - INV-261021-02  Walk-in       ₹ 273.00 |
-| [ Quick Restock Selected ]                |                                         |
-+-----------------------------------------------------------------------------------+
+`<img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+">`{=html}
+`<img src="https://img.shields.io/badge/Interface-Tkinter-0B7285?style=for-the-badge" alt="Tkinter">`{=html}
+`<img src="https://img.shields.io/badge/Database-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">`{=html}
+`<img src="https://img.shields.io/badge/License-MIT-F5C542?style=for-the-badge" alt="MIT License">`{=html}
+```{=html}
+</p>
+```
+[Features](#-features) · [Getting Started](#-getting-started) ·
+[Notebook](#-jupyter-notebook-version) ·
+[Database](#-database-at-a-glance) · [Project
+Structure](#-project-structure) · [Contributing](#-contributing)
+:::
+
+------------------------------------------------------------------------
+
+## 📌 About the Project
+
+**Apna Market** is a Python desktop application designed for local
+markets, retail shops, and grocery stores. It brings everyday shop
+operations---billing, product management, stock tracking, customer
+records, and sales reporting---into one local application.
+
+It uses **Tkinter** for the desktop interface and **SQLite** for local
+data storage, without requiring a separate database server or web
+framework.
+
+You can use either the standalone desktop app (`market_app.py`) or the
+interactive Jupyter Notebook (`market_pos_inventory.ipynb`).
+
+## ✨ Features
+
+```{=html}
+<table>
+```
+```{=html}
+<tr>
+```
+```{=html}
+<td width="50%" valign="top">
+```
+### 📊 Dashboard
+
+-   Today's revenue and units sold
+-   Low-stock alerts and catalog count
+-   Quick-restock workflow
+-   Recent sales activity
+
+### 🏷️ Product Catalog
+
+-   Add, edit, and delete products
+-   Track SKU/barcode, category, and prices
+-   Search products quickly
+-   Highlight products running low
+
+### 🛍️ POS & Checkout
+
+-   Barcode scanner or manual SKU entry
+-   Shopping cart with quantity controls
+-   Customer selection or walk-in sales
+-   Discount and GST/tax calculations
+-   Cash, UPI/QR, and card payment modes
+-   Stock checks to help prevent overselling
+
+```{=html}
+</td>
+```
+```{=html}
+<td width="50%" valign="top">
+```
+### 📦 Inventory Control
+
+-   Record stock-in and stock-out changes
+-   Track damaged or expired stock
+-   Adjust inventory with a reason
+-   Maintain stock-change audit logs
+-   Deduct stock after completed sales
+
+### 👥 Customer Records
+
+-   Store customer contact details
+-   View historical transactions
+-   Review previous orders
+
+### 📈 Reports & Analytics
+
+-   Filter by today, last 7 days, last 30 days, or all time
+-   Review revenue, COGS, gross profit, and margin
+-   Find the top 10 best-selling products
+-   View daily revenue trends with Matplotlib (optional)
+
+### 🧾 Invoices & Roles
+
+-   Generate PDF invoices with ReportLab (optional)
+-   Fall back to text receipts
+-   Admin/Owner and Cashier access modes
+-   Restrict cost prices and profit figures in Cashier mode
+
+```{=html}
+</td>
+```
+```{=html}
+</tr>
+```
+```{=html}
+</table>
+```
+## 🖥️ Interface Preview
+
+The app is organized around a familiar retail workflow:
+
+``` text
+┌─────────────────────────────────────────────────────────────────────┐
+│  🛒 APNA MARKET                            Role: Admin   [Switch]    │
+├─────────────────────────────────────────────────────────────────────┤
+│  Dashboard │ Products │ Billing / POS │ Inventory │ Reports         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Today's Revenue      Units Sold      Low Stock      Total Products  │
+│     ₹12,450              84               3                45        │
+├─────────────────────────────────────────────────────────────────────┤
+│  Low-stock warnings                    Recent sales                 │
+│  • Assam Gold Tea (Stock: 4)            • Invoice #1 — ₹403.99       │
+│  • Herbal Bath Soap (Stock: 3)           • Walk-in — ₹273.00         │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
----
+*Illustrative layout only; figures and entries above are examples.*
 
-## 🚀 Quickstart
+## 🚀 Getting Started
 
-### Prerequisites
-- Python 3.10+ (Tkinter and SQLite3 are included in standard Python)
+### Requirements
 
-### 1. Clone the Repository
-```bash
+-   Python **3.10 or newer**
+-   Tkinter and SQLite3 (normally included with standard Python
+    distributions)
+-   Optional: Matplotlib for revenue charts and ReportLab for PDF
+    invoices
+
+### 1. Clone the repository
+
+Replace the example URL with your repository URL:
+
+``` bash
 git clone https://github.com/your-username/market-pos-inventory.git
 cd market-pos-inventory
 ```
 
-### 2. Create and Activate Virtual Environment
-```bash
-# On Windows
+### 2. Create a virtual environment
+
+**Windows**
+
+``` powershell
 python -m venv .venv
 .venv\Scripts\activate
+```
 
-# On Linux / macOS
+**macOS / Linux**
+
+``` bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install Optional Dependencies
-```bash
+### 3. Install dependencies
+
+``` bash
 pip install -r requirements.txt
 ```
-*(The system runs out-of-the-box using standard libraries alone; `matplotlib` and `reportlab` enhance charts and PDF output).*
 
-### 4. Run the Desktop Application
-```bash
+The app is designed to run with Python's standard libraries. Optional
+packages such as `matplotlib` and `reportlab` add charting and PDF
+invoice features.
+
+### 4. Launch the desktop app
+
+``` bash
 python market_app.py
 ```
 
----
+## 📓 Jupyter Notebook Version
 
-## 📓 Running in Jupyter Notebook
+To explore the notebook workflow:
 
-If you prefer an interactive notebook walkthrough:
+``` bash
+jupyter notebook market_pos_inventory.ipynb
+```
 
-1. Launch Jupyter Notebook or open [`market_pos_inventory.ipynb`](market_pos_inventory.ipynb) in **VS Code**:
-   ```bash
-   jupyter notebook market_pos_inventory.ipynb
-   ```
-2. Run the cells sequentially to inspect the database schema, seed demo data, and generate test invoices.
-3. Run **Step 6** to launch the GUI desktop window directly from the notebook.
+Alternatively, open `market_pos_inventory.ipynb` in VS Code and run its
+cells in order. The notebook covers database setup, demo data, invoice
+generation, and launching the GUI from the notebook.
 
----
+## 🔫 Barcode Scanner Support
 
-## 🗄️ Database Schema
+Most USB and Bluetooth barcode scanners that operate in **HID keyboard
+mode** work like a keyboard.
 
-The SQLite database (`market.db`) is structured with relational integrity:
+1.  Open the **Billing / POS** tab.
+2.  Focus the **Barcode / SKU Scan** input.
+3.  Scan a barcode. The scanner enters the code and sends Enter,
+    allowing the product to be added to the cart.
 
-```mermaid
+## 🗄️ Database at a Glance
+
+The application stores its data locally in `market.db` using SQLite.
+
+``` mermaid
 erDiagram
     PRODUCTS ||--o{ SALE_ITEMS : "sold in"
     PRODUCTS ||--o{ INVENTORY_LOGS : "tracks"
@@ -209,63 +282,67 @@ erDiagram
     }
 ```
 
----
+## 🧰 Tech Stack
 
-## ⚡ Barcode Scanner Hardware Support
+  ------------------------------------------------------------------------------------------
+  Technology                                             Purpose
+  ------------------------------------------------------ -----------------------------------
+  [Python](https://www.python.org/)                      Application logic
 
-Standard USB and Bluetooth handheld barcode scanners emulate keyboard keystrokes (`HID keyboard mode`).
-- In the **Billing / POS** tab, focus the `⚡ Barcode / SKU Scan` field.
-- Scan any product barcode; the scanner automatically inputs the barcode number and sends `Enter`, adding the item instantly to the cart.
+  [Tkinter /                                             Desktop interface
+  ttk](https://docs.python.org/3/library/tkinter.html)   
 
----
+  [SQLite](https://www.sqlite.org/)                      Local relational database
+
+  [Matplotlib](https://matplotlib.org/) *(optional)*     Revenue trend charts
+
+  [ReportLab](https://www.reportlab.com/) *(optional)*   PDF invoice generation
+
+  Jupyter Notebook                                       Interactive walkthrough
+  ------------------------------------------------------------------------------------------
 
 ## 📂 Project Structure
 
-```text
+``` text
+.
 ├── .github/
 │   └── workflows/
-│       └── ci.yml               # Automated CI test workflow
-├── invoices/                    # Output directory for generated PDF & text bills
+│       └── ci.yml
+├── invoices/                    # Generated invoices
 │   └── .gitkeep
-├── .gitignore                   # Git ignore patterns (virtualenvs, databases, cache)
-├── CONTRIBUTING.md              # Contribution and PR guidelines
-├── LICENSE                      # MIT Open Source License
-├── README.md                    # Project documentation & walkthrough
-├── market_app.py                # Main standalone Tkinter + SQLite application
-├── market_pos_inventory.ipynb   # Interactive Jupyter Notebook version
-└── requirements.txt             # Optional package dependencies
+├── .gitignore
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── market_app.py                # Standalone desktop app
+├── market_pos_inventory.ipynb   # Notebook version
+└── requirements.txt
 ```
-
----
-
-## 🛠️ Tech Stack & Dependencies
-
-- **Python 3.10+**: Core programming language
-- **Tkinter & ttk**: Native desktop GUI toolkit
-- **SQLite3**: ACID-compliant local database
-- **[Matplotlib](https://matplotlib.org/)** *(Optional)*: Visual trend charts
-- **[ReportLab](https://www.reportlab.com/)** *(Optional)*: Formatted PDF invoices
-
----
 
 ## 🤝 Contributing
 
-Contributions, feature requests, and bug reports are welcome! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+Ideas, bug reports, and improvements are welcome.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'feat: Add AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1.  Fork the repository.
+2.  Create a branch: `git checkout -b feature/your-feature`
+3.  Make your changes and commit them:
+    `git commit -m "feat: describe your change"`
+4.  Push the branch: `git push origin feature/your-feature`
+5.  Open a Pull Request.
 
----
+Please review [`CONTRIBUTING.md`](CONTRIBUTING.md) before submitting
+changes.
 
 ## 📄 License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for
+details.
 
----
+------------------------------------------------------------------------
 
-<div align="center">
-  <sub>Built with ❤️ for local markets, shops, and entrepreneurs.</sub>
-</div>
+::: {align="center"}
+**Made for local markets, shops, and entrepreneurs.**
+
+`<sub>`{=html}Apna Market · POS & Inventory Management
+System`</sub>`{=html}
+:::
