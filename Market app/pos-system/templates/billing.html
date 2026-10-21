@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Billing & POS - Apna Market POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">🛒 Billing & Point of Sale</h1>
+</div>
+
+<div class="pos-container">
+  <!-- LEFT PANEL: Product Catalog & Quick Scan -->
+  <div class="card pos-catalog">
+    <div class="card-header">
+      <span>📦 Products Catalog</span>
+    </div>
+
+    <!-- Barcode / SKU Scanner input -->
+    <div class="form-group" style="background: #f1f5f9; padding: 0.75rem; border-radius: var(--radius); border: 1px dashed var(--accent);">
+      <label class="form-label" for="barcodeInput" style="color: var(--primary);">⚡ Barcode / SKU Quick Scan (Press Enter)</label>
+      <input type="text" id="barcodeInput" class="form-control" placeholder="Scan barcode or type SKU and hit Enter..." autofocus>
+    </div>
+
+    <!-- Live Search Filter -->
+    <div class="form-group">
+      <input type="text" id="catalogSearch" class="form-control" placeholder="🔍 Search catalog by name or SKU...">
+    </div>
+
+    <div class="table-wrapper" tabindex="0" role="region" aria-label="Available products for sale" style="max-height: 480px;">
+      <table id="productsTable">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th class="text-right">Price</th>
+            <th class="text-center">In Stock</th>
+            <th class="text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+            <tr data-id="{{ p.id }}" data-sku="{{ p.sku }}" data-name="{{ p.name }}" data-price="{{ p.selling_price }}" data-stock="{{ p.stock }}">
+              <td><code>{{ p.sku }}</code></td>
+              <td><strong>{{ p.name }}</strong></td>
+              <td class="text-right">₹ {{ "%.2f"|format(p.selling_price) }}</td>
+              <td class="text-center">
+                <span class="badge {% if p.stock <= 5 %}badge-danger{% else %}badge-success{% endif %}">{{ p.stock }}</span>
+              </td>
+              <td class="text-right">
+                <button type="button" class="btn btn-sm btn-accent add-to-cart-btn" onclick="addToCart({{ p.id }}, '{{ p.sku }}', '{{ p.name }}', {{ p.selling_price }}, {{ p.stock }})">
+                  + Add
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Active Cart & Checkout -->
+  <div class="card pos-cart">
+    <div class="card-header">
+      <span>🛒 Active Cart</span>
+      <button type="button" class="btn btn-outline btn-sm" onclick="clearCart()">Clear Cart</button>
+    </div>
+
+    <!-- Customer Details -->
+    <div class="form-group">
+      <label class="form-label" for="customerSelect">Customer</label>
+      <select id="customerSelect" class="form-select" onchange="handleCustomerSelect()">
+        <option value="Walk-in Customer" data-phone="9999999999">Walk-in Customer (9999999999)</option>
+        {% for c in customers %}
+          <option value="{{ c.name }}" data-phone="{{ c.phone }}">{{ c.name }} ({{ c.phone }})</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Cart Table -->
+    <div class="table-wrapper" tabindex="0" role="region" aria-label="Current checkout cart" style="max-height: 260px;">
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="text-right">Price</th>
+            <th class="text-center">Qty</th>
+            <th class="text-right">Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="cartTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totals Summary & Checkout -->
+    <div class="totals-box">
+      <div class="totals-row">
+        <span>Subtotal:</span>
+        <strong id="lblSubtotal">₹ 0.00</strong>
+      </div>
+
+      <div class="totals-row" style="align-items: center;">
+        <span>Discount (%):</span>
+        <input type="number" id="discountInput" min="0" max="100" value="0" style="width: 70px; text-align: right;" class="form-control" oninput="renderCart()">
+      </div>
+
+      <div class="totals-row" style="align-items: center;">
+        <span>GST / Tax (%):</span>
+        <select id="gstSelect" style="width: 80px;" class="form-select" onchange="renderCart()">
+          <option value="0">0%</option>
+          <option value="5" selected>5%</option>
+          <option value="12">12%</option>
+          <option value="18">18%</option>
+        </select>
+      </div>
+
+      <div class="totals-row" style="align-items: center;">
+        <span>Payment Method:</span>
+        <select id="paymentSelect" style="width: 150px;" class="form-select">
+          <option value="Cash">Cash</option>
+          <option value="UPI / QR Code">UPI / QR Code</option>
+          <option value="Card">Debit / Credit Card</option>
+        </select>
+      </div>
+
+      <div class="totals-row grand-total">
+        <span>Grand Total:</span>
+        <span id="lblGrandTotal">₹ 0.00</span>
+      </div>
+    </div>
+
+    <button type="button" id="btnCheckout" class="btn btn-success btn-block" style="margin-top: 1rem; padding: 0.85rem; font-size: 1.1rem;" onclick="processCheckout()">
+      ✅ Complete Sale & Print Bill
+    </button>
+  </div>
+</div>
+
+<!-- CLIENT JAVASCRIPT FOR CART STATE & LIVE COMPUTATION -->
+<script>
+  let cart = [];
+
+  // Filter Catalog via Search Input
+  document.getElementById('catalogSearch').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#productsTable tbody tr');
+    rows.forEach(row => {
+      const name = row.getAttribute('data-name').toLowerCase();
+      const sku = row.getAttribute('data-sku').toLowerCase();
+      if (name.includes(term) || sku.includes(term)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  });
+
+  // Barcode / SKU Scan handler
+  document.getElementById('barcodeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const code = this.value.trim().toLowerCase();
+      if (!code) return;
+
+      const rows = document.querySelectorAll('#productsTable tbody tr');
+      let found = false;
+      for (let row of rows) {
+        const sku = row.getAttribute('data-sku').toLowerCase();
+        if (sku === code) {
+          const id = parseInt(row.getAttribute('data-id'));
+          const name = row.getAttribute('data-name');
+          const price = parseFloat(row.getAttribute('data-price'));
+          const stock = parseInt(row.getAttribute('data-stock'));
+          addToCart(id, row.getAttribute('data-sku'), name, price, stock);
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        alert('Product not found for SKU: ' + this.value);
+      }
+      this.value = '';
+    }
+  });
+
+  function addToCart(id, sku, name, price, maxStock) {
+    const existing = cart.find(item => item.id === id);
+    if (existing) {
+      if (existing.qty + 1 > maxStock) {
+        alert(`Cannot add more. Only ${maxStock} units available in stock.`);
+        return;
+      }
+      existing.qty += 1;
+    } else {
+      if (maxStock < 1) {
+        alert('Item is currently out of stock.');
+        return;
+      }
+      cart.push({ id, sku, name, price, qty: 1, maxStock });
+    }
+    renderCart();
+  }
+
+  function updateQty(id, delta) {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+
+    const newQty = item.qty + delta;
+    if (newQty <= 0) {
+      cart = cart.filter(i => i.id !== id);
+    } else {
+      if (newQty > item.maxStock) {
+        alert(`Cannot exceed available stock of ${item.maxStock}.`);
+        return;
+      }
+      item.qty = newQty;
+    }
+    renderCart();
+  }
+
+  function removeFromCart(id) {
+    cart = cart.filter(i => i.id !== id);
+    renderCart();
+  }
+
+  function clearCart() {
+    cart = [];
+    renderCart();
+  }
+
+  function renderCart() {
+    const tbody = document.getElementById('cartTableBody');
+    tbody.innerHTML = '';
+
+    if (cart.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="padding: 1.5rem; color: var(--text-muted);">Cart is empty. Click "+ Add" on any product.</td></tr>';
+      document.getElementById('lblSubtotal').innerText = '₹ 0.00';
+      document.getElementById('lblGrandTotal').innerText = '₹ 0.00';
+      return;
+    }
+
+    let subtotal = 0;
+    cart.forEach(item => {
+      const lineTotal = item.price * item.qty;
+      subtotal += lineTotal;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${item.name}</strong><br><small style="color: var(--text-muted);">${item.sku}</small></td>
+        <td class="text-right">₹${item.price.toFixed(2)}</td>
+        <td class="text-center" style="white-space: nowrap;">
+          <button type="button" class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+          <span style="margin: 0 0.35rem; font-weight: 600;">${item.qty}</span>
+          <button type="button" class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+        </td>
+        <td class="text-right">₹${lineTotal.toFixed(2)}</td>
+        <td class="text-right">
+          <button type="button" style="background: none; border: none; color: var(--danger); cursor: pointer;" onclick="removeFromCart(${item.id})">✕</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const discPct = parseFloat(document.getElementById('discountInput').value || 0);
+    const gstPct = parseFloat(document.getElementById('gstSelect').value || 0);
+
+    const discAmt = (subtotal * discPct) / 100.0;
+    const taxable = Math.max(0, subtotal - discAmt);
+    const gstAmt = (taxable * gstPct) / 100.0;
+    const grandTotal = taxable + gstAmt;
+
+    document.getElementById('lblSubtotal').innerText = '₹ ' + subtotal.toFixed(2);
+    document.getElementById('lblGrandTotal').innerText = '₹ ' + grandTotal.toFixed(2);
+  }
+
+  function handleCustomerSelect() {
+    // Optional helper when switching customer
+  }
+
+  async function processCheckout() {
+    if (cart.length === 0) {
+      alert('Your cart is empty! Add products before checking out.');
+      return;
+    }
+
+    const customerSelect = document.getElementById('customerSelect');
+    const selectedOption = customerSelect.options[customerSelect.selectedIndex];
+    const customerName = selectedOption.value;
+    const customerPhone = selectedOption.getAttribute('data-phone');
+    const paymentMethod = document.getElementById('paymentSelect').value;
+    const discountPct = parseFloat(document.getElementById('discountInput').value || 0);
+    const gstPct = parseFloat(document.getElementById('gstSelect').value || 0);
+
+    const payload = {
+      customer_name: customerName,
+      customer_phone: customerPhone,
+      payment_method: paymentMethod,
+      discount_pct: discountPct,
+      gst_pct: gstPct,
+      items: cart.map(i => ({ id: i.id, qty: i.qty }))
+    };
+
+    const btn = document.getElementById('btnCheckout');
+    btn.disabled = true;
+    btn.innerText = 'Processing Sale...';
+
+    try {
+      const response = await fetch("{{ url_for('billing') }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = data.redirect_url;
+      } else {
+        alert('Error completing sale: ' + (data.message || 'Unknown error'));
+        btn.disabled = false;
+        btn.innerText = '✅ Complete Sale & Print Bill';
+      }
+    } catch (err) {
+      alert('Network or server error: ' + err.message);
+      btn.disabled = false;
+      btn.innerText = '✅ Complete Sale & Print Bill';
+    }
+  }
+
+  // Initial render
+  renderCart();
+</script>
+{% endblock %}

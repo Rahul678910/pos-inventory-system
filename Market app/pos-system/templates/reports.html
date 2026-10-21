@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Reports & Profit Analytics - Apna Market POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">📈 Sales Reports & Profit Analytics</h1>
+
+  <!-- Filter Period -->
+  <div style="display: flex; gap: 0.5rem;">
+    <a href="{{ url_for('reports', period='all') }}" class="btn btn-sm {% if period == 'all' %}btn-primary{% else %}btn-outline{% endif %}">All Time</a>
+    <a href="{{ url_for('reports', period='today') }}" class="btn btn-sm {% if period == 'today' %}btn-primary{% else %}btn-outline{% endif %}">Today</a>
+    <a href="{{ url_for('reports', period='7days') }}" class="btn btn-sm {% if period == '7days' %}btn-primary{% else %}btn-outline{% endif %}">Last 7 Days</a>
+    <a href="{{ url_for('reports', period='30days') }}" class="btn btn-sm {% if period == '30days' %}btn-primary{% else %}btn-outline{% endif %}">Last 30 Days</a>
+  </div>
+</div>
+
+<!-- Financial KPI Cards -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-value">₹ {{ "%.2f"|format(total_revenue) }}</div>
+    <div class="kpi-label">Total Revenue</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="color: var(--secondary);">₹ {{ "%.2f"|format(total_cost) }}</div>
+    <div class="kpi-label">Cost of Goods Sold (COGS)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="color: var(--success);">₹ {{ "%.2f"|format(gross_profit) }}</div>
+    <div class="kpi-label">Estimated Gross Profit</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="color: var(--accent);">{{ "%.1f"|format(profit_margin) }}%</div>
+    <div class="kpi-label">Profit Margin</div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem;">
+  <!-- Top 10 Selling Products -->
+  <div class="card">
+    <div class="card-header">
+      <span>🏆 Top-Selling Products</span>
+    </div>
+    {% if top_products %}
+      <div class="table-wrapper" tabindex="0" role="region" aria-label="Top selling products">
+        <table>
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th class="text-center">Units Sold</th>
+              <th class="text-right">Total Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in top_products %}
+              <tr>
+                <td><strong>{{ item.product_name }}</strong></td>
+                <td class="text-center"><span class="badge badge-info">{{ item.total_qty }}</span></td>
+                <td class="text-right"><strong>₹ {{ "%.2f"|format(item.total_rev) }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); padding: 1.5rem 0;" class="text-center">No sales records in selected period.</p>
+    {% endif %}
+  </div>
+
+  <!-- Daily Sales Revenue Breakdown -->
+  <div class="card">
+    <div class="card-header">
+      <span>📅 Daily Revenue Breakdown</span>
+    </div>
+    {% if daily_sales %}
+      <div class="table-wrapper" tabindex="0" role="region" aria-label="Daily sales breakdown">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="text-center">Orders Count</th>
+              <th class="text-right">Daily Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in daily_sales %}
+              <tr>
+                <td><strong>{{ row.sale_date }}</strong></td>
+                <td class="text-center"><span class="badge badge-success">{{ row.orders_count }} orders</span></td>
+                <td class="text-right"><strong>₹ {{ "%.2f"|format(row.daily_revenue) }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); padding: 1.5rem 0;" class="text-center">No sales records in selected period.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+# Core Optional Dependencies
+# Note: Python's built-in libraries (Tkinter, SQLite3, datetime, json) are included with standard Python.
+
+# Sales trend visualizations & analytics charts
+matplotlib>=3.7.0
+
+# Professional PDF invoice & receipt generation
+reportlab>=4.0.0
+
+# Optional: Jupyter Notebook interactive runtime support
+ipykernel>=6.20.0
+notebook>=7.0.0

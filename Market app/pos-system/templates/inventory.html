@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory & Stock Manager - Apna Market POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">📦 Inventory & Stock Management</h1>
+</div>
+
+<!-- Manual Stock Adjustment Form -->
+<div class="card">
+  <div class="card-header">
+    <span>⚡ Stock Adjustment (In / Out / Audit)</span>
+  </div>
+  <form method="POST">
+    <div class="form-row">
+      <div class="form-group" style="flex: 2;">
+        <label class="form-label" for="product_id">Select Product *</label>
+        <select id="product_id" name="product_id" class="form-select" required>
+          <option value="" disabled selected>-- Choose Product --</option>
+          {% for p in products %}
+            <option value="{{ p.id }}">[{{ p.sku }}] {{ p.name }} (Current Stock: {{ p.stock }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="action_type">Movement Type *</label>
+        <select id="action_type" name="action_type" class="form-select" required>
+          <option value="STOCK_IN">➕ STOCK IN (Purchase / Restock)</option>
+          <option value="STOCK_OUT">➖ STOCK OUT (Damaged / Expired)</option>
+          <option value="ADJUSTMENT">⚙️ AUDIT CORRECTION (Set Exact)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="qty">Quantity *</label>
+        <input type="number" min="1" id="qty" name="qty" class="form-control" required placeholder="Qty">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="reason">Reason / Reference Notes</label>
+      <input type="text" id="reason" name="reason" class="form-control" placeholder="e.g. Supplier delivery PO-4021, expired package, monthly physical audit count...">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Apply Stock Update</button>
+  </form>
+</div>
+
+<!-- Audit Log Table -->
+<div class="card">
+  <div class="card-header">
+    <span>📜 Real-Time Inventory Movement Audit Trail</span>
+  </div>
+  <div class="table-wrapper" tabindex="0" role="region" aria-label="Inventory audit logs">
+    <table>
+      <thead>
+        <tr>
+          <th>Log #</th>
+          <th>Timestamp</th>
+          <th>Product Name</th>
+          <th class="text-center">Action</th>
+          <th class="text-center">Change</th>
+          <th class="text-center">Prev Stock</th>
+          <th class="text-center">New Stock</th>
+          <th>Reason / Reference</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td><code>#{{ log.id }}</code></td>
+            <td>{{ log.logged_at }}</td>
+            <td><strong>{{ log.product_name }}</strong></td>
+            <td class="text-center">
+              {% if log.change_type == 'STOCK_IN' %}
+                <span class="badge badge-success">STOCK IN</span>
+              {% elif log.change_type == 'SALE' %}
+                <span class="badge badge-info">SALE</span>
+              {% elif log.change_type == 'STOCK_OUT' %}
+                <span class="badge badge-danger">STOCK OUT</span>
+              {% else %}
+                <span class="badge badge-warning">ADJUSTMENT</span>
+              {% endif %}
+            </td>
+            <td class="text-center font-bold">
+              {% if log.qty_change > 0 %}
+                <span style="color: var(--success); font-weight: bold;">+{{ log.qty_change }}</span>
+              {% else %}
+                <span style="color: var(--danger); font-weight: bold;">{{ log.qty_change }}</span>
+              {% endif %}
+            </td>
+            <td class="text-center">{{ log.previous_stock }}</td>
+            <td class="text-center"><strong>{{ log.new_stock }}</strong></td>
+            <td>{{ log.reason }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" class="text-center" style="padding: 2rem; color: var(--text-muted);">
+              No inventory logs recorded yet.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

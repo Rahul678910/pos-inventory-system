@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice #{{ sale.invoice_no }} - Apna Market POS{% endblock %}
+
+{% block content %}
+<div class="no-print" style="display: flex; justify-content: space-between; align-items: center; max-width: 440px; margin: 1rem auto;">
+  <a href="{{ url_for('billing') }}" class="btn btn-outline">← Back to POS</a>
+  <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
+</div>
+
+<div class="receipt-wrapper">
+  <div style="text-align: center; margin-bottom: 1.25rem;">
+    <h2 style="font-size: 1.3rem; margin-bottom: 0.25rem;">🛒 APNA MARKET</h2>
+    <p style="font-size: 0.85rem; color: #475569;">
+      Main Market Road, City Center<br>
+      GSTIN: 22AAAAA0000A1Z5 | Ph: +91 98765 00000
+    </p>
+  </div>
+
+  <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 0.5rem 0; font-size: 0.85rem; margin-bottom: 1rem;">
+    <div style="display: flex; justify-content: space-between;">
+      <span><strong>Invoice #:</strong> {{ sale.invoice_no }}</span>
+      <span><strong>Date:</strong> {{ sale.sold_at[:16] }}</span>
+    </div>
+    <div><strong>Customer:</strong> {{ sale.customer_name }} ({{ sale.customer_phone }})</div>
+    <div><strong>Payment:</strong> {{ sale.payment_method }} | <strong>Status:</strong> PAID</div>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1rem;">
+    <thead>
+      <tr style="border-bottom: 1px solid #000;">
+        <th style="padding: 4px 0; text-align: left;">Item</th>
+        <th style="padding: 4px 0; text-align: right;">Price</th>
+        <th style="padding: 4px 0; text-align: center;">Qty</th>
+        <th style="padding: 4px 0; text-align: right;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        <tr>
+          <td style="padding: 4px 0;">{{ item.product_name }}</td>
+          <td style="padding: 4px 0; text-align: right;">{{ "%.2f"|format(item.unit_price) }}</td>
+          <td style="padding: 4px 0; text-align: center;">{{ item.qty }}</td>
+          <td style="padding: 4px 0; text-align: right;">{{ "%.2f"|format(item.line_total) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="border-top: 1px dashed #000; padding-top: 0.5rem; font-size: 0.85rem;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.2rem;">
+      <span>Subtotal:</span>
+      <span>₹ {{ "%.2f"|format(sale.subtotal) }}</span>
+    </div>
+    {% if sale.discount_amt > 0 %}
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.2rem;">
+        <span>Discount ({{ sale.discount_pct }}%):</span>
+        <span>- ₹ {{ "%.2f"|format(sale.discount_amt) }}</span>
+      </div>
+    {% endif %}
+    {% if sale.gst_amt > 0 %}
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.2rem;">
+        <span>GST ({{ sale.gst_pct }}%):</span>
+        <span>+ ₹ {{ "%.2f"|format(sale.gst_amt) }}</span>
+      </div>
+    {% endif %}
+    <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: bold; border-top: 1px solid #000; padding-top: 0.4rem; margin-top: 0.4rem;">
+      <span>GRAND TOTAL:</span>
+      <span>₹ {{ "%.2f"|format(sale.grand_total) }}</span>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: #475569;">
+    <p>Thank you for shopping with us!</p>
+    <p>Goods once sold can only be exchanged with original bill within 7 days.</p>
+  </div>
+</div>
+{% endblock %}

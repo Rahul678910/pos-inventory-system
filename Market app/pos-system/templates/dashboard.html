@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Apna Market POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Shop Dashboard</h1>
+  <a href="{{ url_for('billing') }}" class="btn btn-primary">🛒 Start New Sale (POS)</a>
+</div>
+
+<!-- 4 Key Performance Indicators -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-value">₹ {{ "%.2f"|format(today_revenue) }}</div>
+    <div class="kpi-label">Today's Sales Revenue</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{{ today_units }}</div>
+    <div class="kpi-label">Units Sold Today</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="color: var(--danger);">{{ low_stock_count }}</div>
+    <div class="kpi-label">Low-Stock Alerts</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{{ total_products }}</div>
+    <div class="kpi-label">Total Active Products</div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.5rem;">
+  <!-- Low Stock Warnings -->
+  <div class="card">
+    <div class="card-header">
+      <span>⚠️ Low-Stock Warnings (Requires Restock)</span>
+      <a href="{{ url_for('inventory') }}" class="btn btn-outline btn-sm">Stock Manager</a>
+    </div>
+    {% if low_stock_items %}
+      <div class="table-wrapper" tabindex="0" role="region" aria-label="Low stock products">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product</th>
+              <th class="text-center">Stock</th>
+              <th class="text-center">Min Alert</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in low_stock_items %}
+              <tr>
+                <td><code>{{ p.sku }}</code></td>
+                <td><strong>{{ p.name }}</strong></td>
+                <td class="text-center"><span class="badge badge-danger">{{ p.stock }} left</span></td>
+                <td class="text-center">{{ p.min_stock }}</td>
+                <td class="text-right">
+                  <a href="{{ url_for('inventory') }}" class="btn btn-sm btn-outline">Restock</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); padding: 1rem 0;">All products have healthy inventory levels!</p>
+    {% endif %}
+  </div>
+
+  <!-- Recent Sales Activity -->
+  <div class="card">
+    <div class="card-header">
+      <span>🕒 Recent Sales Activity</span>
+      <a href="{{ url_for('reports') }}" class="btn btn-outline btn-sm">View Reports</a>
+    </div>
+    {% if recent_sales %}
+      <div class="table-wrapper" tabindex="0" role="region" aria-label="Recent sales transactions">
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Customer</th>
+              <th>Payment</th>
+              <th class="text-right">Amount</th>
+              <th class="text-center">Receipt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in recent_sales %}
+              <tr>
+                <td><code>{{ s.invoice_no }}</code></td>
+                <td>{{ s.customer_name }}</td>
+                <td><span class="badge badge-info">{{ s.payment_method }}</span></td>
+                <td class="text-right"><strong>₹ {{ "%.2f"|format(s.grand_total) }}</strong></td>
+                <td class="text-center">
+                  <a href="{{ url_for('receipt', sale_id=s.id) }}" class="btn btn-sm btn-outline">View</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); padding: 1rem 0;">No sales transactions recorded yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

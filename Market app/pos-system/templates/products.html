@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Products Catalog - Apna Market POS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Products Management</h1>
+  <a href="{{ url_for('product_new') }}" class="btn btn-primary">➕ Add New Product</a>
+</div>
+
+<div class="card">
+  <!-- Search Bar -->
+  <form method="GET" action="{{ url_for('products') }}" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; max-width: 500px;">
+    <input type="text" name="q" value="{{ query or '' }}" placeholder="Search by name, SKU, or category..." class="form-control">
+    <button type="submit" class="btn btn-accent">Search</button>
+    {% if query %}
+      <a href="{{ url_for('products') }}" class="btn btn-outline">Reset</a>
+    {% endif %}
+  </form>
+
+  <div class="table-wrapper" tabindex="0" role="region" aria-label="Product inventory catalog">
+    <table>
+      <thead>
+        <tr>
+          <th>SKU / Barcode</th>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th class="text-right">Cost (₹)</th>
+          <th class="text-right">Selling Price (₹)</th>
+          <th class="text-center">Current Stock</th>
+          <th class="text-center">Min Stock</th>
+          <th class="text-center">Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+          <tr>
+            <td><code>{{ p.sku }}</code></td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td>{{ p.category }}</td>
+            <td class="text-right">₹ {{ "%.2f"|format(p.cost_price) }}</td>
+            <td class="text-right"><strong>₹ {{ "%.2f"|format(p.selling_price) }}</strong></td>
+            <td class="text-center">
+              {% if p.stock <= p.min_stock %}
+                <span class="badge badge-danger">{{ p.stock }}</span>
+              {% else %}
+                <span class="badge badge-success">{{ p.stock }}</span>
+              {% endif %}
+            </td>
+            <td class="text-center">{{ p.min_stock }}</td>
+            <td class="text-center">
+              {% if p.stock <= p.min_stock %}
+                <span class="badge badge-danger">⚠️ LOW STOCK</span>
+              {% else %}
+                <span class="badge badge-success">IN STOCK</span>
+              {% endif %}
+            </td>
+            <td class="text-right" style="white-space: nowrap;">
+              <a href="{{ url_for('product_edit', id=p.id) }}" class="btn btn-sm btn-outline">Edit</a>
+              <form method="POST" action="{{ url_for('product_delete', id=p.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="9" class="text-center" style="padding: 2rem; color: var(--text-muted);">
+              No products found matching your search.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
